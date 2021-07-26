@@ -22,12 +22,12 @@ jobs:
           command: docker push kriordan/talk-booking:cicd-python3.9-slim
 
   service-talk-booking-code-quality:
-    working_directory: ~/talk-booking
     docker:
       - image: kriordan/talk-booking:cicd-python3.9-slim
 
     steps:
       - checkout
+      - run: pwd
       - python/install-packages:
           app-dir: services/talk-booking/
           pkg-manager: poetry
