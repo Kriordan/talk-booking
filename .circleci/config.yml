@@ -28,9 +28,10 @@ jobs:
     steps:
       - checkout
       - run: pwd
-      - python/install-packages:
-          app-dir: services/talk-booking/
-          pkg-manager: poetry
+      - run:
+          name: Install dependencies
+          working_directory: services/talk-booking/
+          command: poetry install
       - run:
           name: Run code quality checks
           working_directory: services/talk-booking/
