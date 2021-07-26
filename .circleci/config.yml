@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  codecov: codecov/codecov@1.2.3
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.2
 
@@ -24,10 +25,8 @@ jobs:
   service-talk-booking-code-quality:
     docker:
       - image: kriordan/talk-booking:cicd-python3.9-slim
-
     steps:
       - checkout
-      - run: pwd
       - run:
           name: Install dependencies
           working_directory: services/talk-booking/
@@ -42,8 +41,27 @@ jobs:
             poetry run bandit .
             poetry run safety check
 
+  service-talk-booking-tests:
+    docker:
+      - image: kriordan/talk-booking:cicd-python3.9-slim
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          working_directory: services/talk-booking/
+          command: poetry install
+      - run:
+          name: Run tests
+          working_directory: services/talk-booking/
+          command: poetry run python -m pytest --junitxml=report.xml --cov=./ --cov-report=xml tests/unit tests/integration
+      - codecov/upload:
+          file: services/talk-booking/coverage.xml
+      - store_artifacts:
+          path: services/talk-booking/report.xml
+
 workflows:
   talk-booking: 
     jobs:
       - build-python-ci-image
       - service-talk-booking-code-quality
+      - service-talk-booking-tests
