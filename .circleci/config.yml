@@ -49,6 +49,8 @@ jobs:
       - image: kriordan/talk-booking:cicd-python3.9-slim
     steps:
       - checkout
+      - check-diff-files-to-halt:
+          pattern: "^services/talk-booking"
       - run:
           name: Install dependencies
           working_directory: services/talk-booking/
@@ -68,6 +70,8 @@ jobs:
       - image: kriordan/talk-booking:cicd-python3.9-slim
     steps:
       - checkout
+      - check-diff-files-to-halt:
+          pattern: "^services/talk-booking"
       - run:
           name: Install dependencies
           working_directory: services/talk-booking/
@@ -85,5 +89,8 @@ workflows:
   talk-booking: 
     jobs:
       - build-python-ci-image
+          filters:
+            branches:
+              only: main
       - service-talk-booking-code-quality
       - service-talk-booking-tests
