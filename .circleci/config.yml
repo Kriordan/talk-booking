@@ -88,7 +88,7 @@ jobs:
 workflows:
   talk-booking: 
     jobs:
-      - build-python-ci-image
+      - build-python-ci-image:
           filters:
             branches:
               only: main
