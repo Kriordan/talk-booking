@@ -5,12 +5,34 @@ orbs:
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.2
 
+commands:
+  check-diff-files-to-halt:
+    description: "halt CircleCI step if there is any files matched with a pattern"
+    parameters:
+      pattern:
+        description: "regular expression to filter changed files"
+        type: string
+    steps:
+      - run: |
+          # `|| :` is used to avoid exit when there is no changed file which matches the pattern.
+          changed_files=$(bash ./ci/get_changed_files.sh "<< parameters.pattern >>" || :)
+          num_changed_files=$(echo "$changed_files" | grep -v -e '^\s*$' | wc -l || :)
+          if [[ $num_changed_files -eq 0 ]] ; then
+            echo "Halt due to no changed file"
+            circleci step halt
+          else
+            echo "Changed files match the pattern << parameters.pattern >>"
+            echo $changed_files
+          fi
+
 jobs:
   build-python-ci-image:
     docker:
       - image: cimg/base:2021.05
     steps:
       - checkout
+      - check-diff-files-to-halt:
+          pattern: Dockerfile
       - setup_remote_docker
       - run:
           name: Log in to Docker Hub
